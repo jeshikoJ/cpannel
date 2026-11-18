@@ -1,0 +1,1164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>cPanel &reg; - Hosting Control Panel</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220%200%20100%20100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23ff6c2c%22/><text y=%2268%22 font-size=%2260%22 font-weight=%22bold%22 fill=%22white%22 text-anchor=%22middle%22 x=%2250%22 font-family=%22sans-serif%22>cP</text></svg>">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Top Navigation Header -->
+  <header class="cp-header">
+    <div class="cp-header-left">
+      <div class="cp-brand">
+        <div class="cp-logo-badge">cP</div>
+        <span class="cp-brand-name">cPanel</span>
+        <span class="cp-theme-badge">Jupiter</span>
+      </div>
+      <div class="cp-search-wrap">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" id="toolSearch" class="cp-search-input" placeholder="Search tools (e.g. File Manager, MySQL, DNS, Terminal)..." autocomplete="off">
+        <span class="search-kbd-hint">/</span>
+      </div>
+    </div>
+
+    <div class="cp-header-right">
+      <button class="nav-btn icon-btn" id="btnTerminalQuick" title="Open Terminal">
+        <i class="fa-solid fa-terminal"></i>
+        <span class="btn-text">Terminal</span>
+      </button>
+      <button class="nav-btn icon-btn" id="btnNotification" title="Notifications">
+        <i class="fa-solid fa-bell"></i>
+        <span class="notif-badge">3</span>
+      </button>
+      <div class="user-profile-menu">
+        <div class="user-avatar"><i class="fa-solid fa-user-shield"></i></div>
+        <div class="user-info">
+          <span class="user-name" id="topUsername">cpanel_admin</span>
+          <span class="user-ip" id="topServerIp">192.168.1.100</span>
+        </div>
+        <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+      </div>
+      <button class="nav-btn icon-btn" id="btnThemeToggle" title="Toggle Theme">
+        <i class="fa-solid fa-moon" id="themeIcon"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- Notice Banner -->
+  <div class="cp-notice-banner">
+    <div class="notice-content">
+      <i class="fa-solid fa-circle-check notice-icon"></i>
+      <span><strong>Server Status:</strong> All services (Apache, PHP-FPM, MySQL, Exim, BIND) are online. AutoSSL certificate coverage is active.</span>
+    </div>
+    <button class="notice-dismiss" onclick="this.parentElement.remove()">&times;</button>
+  </div>
+
+  <!-- Main Container -->
+  <main class="cp-main-container">
+    <!-- Left Column: Tool Categories -->
+    <div class="cp-tools-column">
+
+      <!-- Category: Files -->
+      <section class="tool-category-card" data-category="files">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-folder-tree cat-icon cat-files"></i>
+            <h2>Files</h2>
+          </div>
+          <span class="cat-item-count">6 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('fileManagerModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-folder-open"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">File Manager</span>
+              <span class="tool-desc">Upload, edit and organize website files</span>
+            </div>
+            <span class="tool-tag popular">Popular</span>
+          </div>
+          <div class="tool-item" onclick="openModal('fileManagerModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-hard-drive"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Disk Usage</span>
+              <span class="tool-desc">Analyze disk space consumption</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Directory Privacy configured for /public_html')">
+            <div class="tool-icon-box"><i class="fa-solid fa-lock"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Directory Privacy</span>
+              <span class="tool-desc">Protect folders with password</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('FTP Accounts service is enabled on port 21')">
+            <div class="tool-icon-box"><i class="fa-solid fa-network-wired"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">FTP Accounts</span>
+              <span class="tool-desc">Manage FTP users and access</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="openModal('backupModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-box-archive"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Backup Wizard</span>
+              <span class="tool-desc">Download full cPanel backups</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Git Repository Manager is synced with repository')">
+            <div class="tool-icon-box"><i class="fa-brands fa-git-alt"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Git Version Control</span>
+              <span class="tool-desc">Deploy directly from GitHub &amp; GitLab</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: Databases -->
+      <section class="tool-category-card" data-category="databases">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-database cat-icon cat-db"></i>
+            <h2>Databases</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('mysqlModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-database"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">MySQL&reg; Databases</span>
+              <span class="tool-desc">Manage relational databases and users</span>
+            </div>
+            <span class="tool-tag popular">Popular</span>
+          </div>
+          <div class="tool-item" onclick="openPhpMyAdmin()">
+            <div class="tool-icon-box"><i class="fa-solid fa-table-cells"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">phpMyAdmin</span>
+              <span class="tool-desc">Direct SQL query and table administration</span>
+            </div>
+            <span class="tool-tag direct">SQL Console</span>
+          </div>
+          <div class="tool-item" onclick="openModal('mysqlModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-wand-magic-sparkles"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">MySQL Database Wizard</span>
+              <span class="tool-desc">Step-by-step database creation</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Remote MySQL access: Host IP % allowed')">
+            <div class="tool-icon-box"><i class="fa-solid fa-server"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Remote MySQL</span>
+              <span class="tool-desc">Allow external IP connections</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: Domains -->
+      <section class="tool-category-card" data-category="domains">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-globe cat-icon cat-domains"></i>
+            <h2>Domains &amp; DNS</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('dnsModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-network-wired"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Zone Editor (DNS)</span>
+              <span class="tool-desc">Manage A, CNAME, MX, TXT records</span>
+            </div>
+            <span class="tool-tag popular">Popular</span>
+          </div>
+          <div class="tool-item" onclick="openModal('dnsModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-sitemap"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Domains</span>
+              <span class="tool-desc">Manage domain names and document roots</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Subdomains manager: api.example.com, staging.example.com active')">
+            <div class="tool-icon-box"><i class="fa-solid fa-diagram-project"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Subdomains</span>
+              <span class="tool-desc">Create prefix subdomains</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Redirect rules: 301 Permanent HTTPS redirection active')">
+            <div class="tool-icon-box"><i class="fa-solid fa-arrow-turn-down"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Redirects</span>
+              <span class="tool-desc">Set 301 and 302 URL forwards</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: Email -->
+      <section class="tool-category-card" data-category="email">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-envelope cat-icon cat-email"></i>
+            <h2>Email</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('emailModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-at"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Email Accounts</span>
+              <span class="tool-desc">Create addresses, passwords and quotas</span>
+            </div>
+            <span class="tool-tag popular">Popular</span>
+          </div>
+          <div class="tool-item" onclick="openModal('webmailModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-inbox"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Webmail</span>
+              <span class="tool-desc">Check mail via Roundcube simulation</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Forwarder: support@example.com -> admin@example.com configured')">
+            <div class="tool-icon-box"><i class="fa-solid fa-share"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Forwarders</span>
+              <span class="tool-desc">Send copies of incoming email</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Email Deliverability: SPF=PASS, DKIM=VALID, DMARC=PASS')">
+            <div class="tool-icon-box"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Email Deliverability</span>
+              <span class="tool-desc">Verify SPF, DKIM and DMARC keys</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: Security -->
+      <section class="tool-category-card" data-category="security">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-shield-halved cat-icon cat-security"></i>
+            <h2>Security</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('sslModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-certificate"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">SSL/TLS Status</span>
+              <span class="tool-desc">AutoSSL, Let's Encrypt certificates</span>
+            </div>
+            <span class="tool-tag active">SSL Valid</span>
+          </div>
+          <div class="tool-item" onclick="openModal('terminalModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-key"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">SSH Access</span>
+              <span class="tool-desc">Manage SSH public/private keys</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('IP Blocker: 0 blocked IP addresses currently')">
+            <div class="tool-icon-box"><i class="fa-solid fa-ban"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">IP Blocker</span>
+              <span class="tool-desc">Block malicious IPs from your site</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('ModSecurity Web Application Firewall is enabled')">
+            <div class="tool-icon-box"><i class="fa-solid fa-user-lock"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">ModSecurity</span>
+              <span class="tool-desc">WAF protection against web exploits</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: Software -->
+      <section class="tool-category-card" data-category="software">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-cubes cat-icon cat-software"></i>
+            <h2>Software &amp; Applications</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('softaculousModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-rocket"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Softaculous App Installer</span>
+              <span class="tool-desc">1-Click WordPress, Laravel, Node.js</span>
+            </div>
+            <span class="tool-tag popular">1-Click</span>
+          </div>
+          <div class="tool-item" onclick="showToast('PHP Selector: Active version is PHP 8.3 (EA-PHP83)')">
+            <div class="tool-icon-box"><i class="fa-brands fa-php"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Select PHP Version</span>
+              <span class="tool-desc">Switch between PHP 7.4, 8.1, 8.2, 8.3</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="openModal('softaculousModal')">
+            <div class="tool-icon-box"><i class="fa-brands fa-node-js"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Setup Node.js App</span>
+              <span class="tool-desc">Manage npm dependencies &amp; PM2 process</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="openModal('softaculousModal')">
+            <div class="tool-icon-box"><i class="fa-brands fa-wordpress"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">WordPress Manager</span>
+              <span class="tool-desc">Manage WP instances, plugins &amp; updates</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: Advanced -->
+      <section class="tool-category-card" data-category="advanced">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-sliders cat-icon cat-advanced"></i>
+            <h2>Advanced</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openModal('terminalModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-terminal"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Terminal</span>
+              <span class="tool-desc">Interactive in-browser command line</span>
+            </div>
+            <span class="tool-tag cli">CLI</span>
+          </div>
+          <div class="tool-item" onclick="openModal('cronModal')">
+            <div class="tool-icon-box"><i class="fa-solid fa-clock"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Cron Jobs</span>
+              <span class="tool-desc">Schedule recurring automated commands</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Track DNS lookup: resolving ns1.cpanel.com -> 192.168.1.100')">
+            <div class="tool-icon-box"><i class="fa-solid fa-route"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Track DNS</span>
+              <span class="tool-desc">Traceroute and DNS lookup diagnostic</span>
+            </div>
+          </div>
+          <div class="tool-item" onclick="showToast('Error Log viewer: Apache error_log contains 0 critical errors')">
+            <div class="tool-icon-box"><i class="fa-solid fa-triangle-exclamation"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Raw Logs &amp; Errors</span>
+              <span class="tool-desc">View real-time web server error log</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: General Information & Live Statistics -->
+    <aside class="cp-sidebar-column">
+
+      <!-- General Information Panel -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-header">
+          <h3><i class="fa-solid fa-circle-info"></i> General Information</h3>
+        </div>
+        <div class="sidebar-info-list">
+          <div class="info-row">
+            <span class="info-label">Current User:</span>
+            <span class="info-value highlight" id="infoUsername">cpanel_admin</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Primary Domain:</span>
+            <span class="info-value" id="infoDomain">example.com</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Shared IP Address:</span>
+            <span class="info-value" id="infoIp">192.168.1.100</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Home Directory:</span>
+            <span class="info-value code-font" id="infoHomeDir">/home/cpanel_admin</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">cPanel Version:</span>
+            <span class="info-value" id="infoCpanelVer">124.0.18</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Web Server:</span>
+            <span class="info-value" id="infoApacheVer">Apache/2.4.62</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">PHP Version:</span>
+            <span class="info-value" id="infoPhpVer">8.3.14</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">MySQL Version:</span>
+            <span class="info-value" id="infoMysqlVer">8.0.39-community</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">System Uptime:</span>
+            <span class="info-value" id="infoUptime">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Resource Statistics Panel -->
+      <div class="sidebar-card">
+        <div class="sidebar-card-header">
+          <h3><i class="fa-solid fa-chart-pie"></i> Statistics</h3>
+          <span class="live-pulse" title="Live updates every 3s"><span class="pulse-dot"></span> LIVE</span>
+        </div>
+        <div class="sidebar-stats-list">
+
+          <!-- CPU Usage -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-microchip"></i> CPU Usage</span>
+              <span class="stat-numbers" id="cpuNumbers">0%</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill" id="cpuFill" style="width: 0%;"></div>
+            </div>
+            <span class="stat-subtext" id="cpuCores">Detecting CPU...</span>
+          </div>
+
+          <!-- Memory Usage -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-memory"></i> Physical Memory</span>
+              <span class="stat-numbers" id="memNumbers">0 GB / 0 GB</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill" id="memFill" style="width: 0%;"></div>
+            </div>
+            <span class="stat-subtext" id="memPercent">0% utilized</span>
+          </div>
+
+          <!-- Disk Usage -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-hard-drive"></i> Disk Usage</span>
+              <span class="stat-numbers" id="diskNumbers">1.2 MB / 50 GB</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill fill-green" id="diskFill" style="width: 2.4%;"></div>
+            </div>
+            <span class="stat-subtext">50,000 MB Total Quota</span>
+          </div>
+
+          <!-- Bandwidth -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-gauge-high"></i> Monthly Bandwidth</span>
+              <span class="stat-numbers" id="bandwidthNumbers">38.45 GB / 500 GB</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill fill-blue" id="bandwidthFill" style="width: 7.7%;"></div>
+            </div>
+            <span class="stat-subtext">Renews on the 1st of next month</span>
+          </div>
+
+          <!-- Inodes / Files -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-file-lines"></i> File Count (Inodes)</span>
+              <span class="stat-numbers" id="inodeNumbers">1,425 / 250,000</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill fill-green" id="inodeFill" style="width: 1%;"></div>
+            </div>
+          </div>
+
+          <!-- MySQL Disk -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-database"></i> MySQL&reg; Disk Usage</span>
+              <span class="stat-numbers">67.4 MB / 5,000 MB</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill fill-purple" style="width: 1.3%;"></div>
+            </div>
+          </div>
+
+          <!-- Entry Processes -->
+          <div class="stat-gauge-item">
+            <div class="stat-meta">
+              <span class="stat-name"><i class="fa-solid fa-arrows-split-up-and-left"></i> Entry Processes</span>
+              <span class="stat-numbers">3 / 25</span>
+            </div>
+            <div class="stat-progress-bar">
+              <div class="stat-fill fill-green" style="width: 12%;"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+  <!-- MODAL 1: FILE MANAGER -->
+  <div class="cp-modal-backdrop" id="fileManagerModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-folder-tree modal-icon"></i>
+          <h3>cPanel File Manager &mdash; <span class="path-title" id="fmCurrentPath">/public_html</span></h3>
+        </div>
+        <div class="modal-actions-right">
+          <button class="btn-sm btn-outline" onclick="fmRefresh()"><i class="fa-solid fa-rotate"></i> Reload</button>
+          <button class="modal-close-btn" onclick="closeModal('fileManagerModal')">&times;</button>
+        </div>
+      </div>
+
+      <!-- File Manager Action Toolbar -->
+      <div class="fm-toolbar">
+        <button class="fm-btn" onclick="fmGoUp()"><i class="fa-solid fa-level-up-alt"></i> Up One Level</button>
+        <span class="fm-divider"></span>
+        <button class="fm-btn" onclick="openFmNewFile()"><i class="fa-solid fa-file-circle-plus"></i> + File</button>
+        <button class="fm-btn" onclick="openFmNewFolder()"><i class="fa-solid fa-folder-plus"></i> + Folder</button>
+        <button class="fm-btn" onclick="openFmUpload()"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</button>
+        <span class="fm-divider"></span>
+        <button class="fm-btn" id="fmBtnEdit" disabled onclick="fmEditSelected()"><i class="fa-solid fa-code"></i> Edit</button>
+        <button class="fm-btn" id="fmBtnRename" disabled onclick="fmRenameSelected()"><i class="fa-solid fa-i-cursor"></i> Rename</button>
+        <button class="fm-btn danger" id="fmBtnDelete" disabled onclick="fmDeleteSelected()"><i class="fa-solid fa-trash-can"></i> Delete</button>
+      </div>
+
+      <div class="fm-body-wrap">
+        <div class="fm-table-wrap">
+          <table class="fm-table">
+            <thead>
+              <tr>
+                <th width="35%">Name</th>
+                <th width="15%">Size</th>
+                <th width="20%">Type</th>
+                <th width="20%">Last Modified</th>
+                <th width="10%">Perms</th>
+              </tr>
+            </thead>
+            <tbody id="fmTableBody">
+              <tr><td colspan="5" class="loading-cell">Loading files...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <span id="fmStatusMsg">Selected: None</span>
+        <button class="btn-secondary" onclick="closeModal('fileManagerModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUB-MODAL: CODE EDITOR -->
+  <div class="cp-modal-backdrop" id="codeEditorModal">
+    <div class="cp-modal-window modal-wide editor-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-code modal-icon"></i>
+          <h3>Code Editor &mdash; <span id="editorFileName">index.html</span></h3>
+        </div>
+        <div class="modal-actions-right">
+          <button class="btn-sm btn-primary" onclick="saveCodeEditor()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+          <button class="modal-close-btn" onclick="closeModal('codeEditorModal')">&times;</button>
+        </div>
+      </div>
+      <div class="editor-body">
+        <textarea id="editorTextarea" spellcheck="false"></textarea>
+      </div>
+      <div class="modal-footer">
+        <span class="editor-info" id="editorStatus">Encoding: UTF-8 | Line wrap: ON</span>
+        <div>
+          <button class="btn-secondary" onclick="closeModal('codeEditorModal')">Cancel</button>
+          <button class="btn-primary" onclick="saveCodeEditor()"><i class="fa-solid fa-floppy-disk"></i> Save Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: MYSQL DATABASES -->
+  <div class="cp-modal-backdrop" id="mysqlModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-database modal-icon"></i>
+          <h3>MySQL&reg; Database Management</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('mysqlModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <!-- Create DB Row -->
+        <div class="card-section">
+          <h4><i class="fa-solid fa-plus-circle"></i> Create New Database</h4>
+          <div class="form-row">
+            <div class="input-prefix-group">
+              <span class="input-prefix">cpanel_</span>
+              <input type="text" id="newDbName" placeholder="database_name" class="styled-input">
+            </div>
+            <button class="btn-primary" onclick="createDatabase()"><i class="fa-solid fa-plus"></i> Create Database</button>
+          </div>
+        </div>
+
+        <!-- Current DBs Table -->
+        <div class="card-section">
+          <h4><i class="fa-solid fa-list-check"></i> Current Databases</h4>
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Database</th>
+                <th>Size</th>
+                <th>Assigned Users</th>
+                <th>Collation</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dbTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="openPhpMyAdmin()"><i class="fa-solid fa-table-cells"></i> Open phpMyAdmin SQL Runner</button>
+        <button class="btn-secondary" onclick="closeModal('mysqlModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: phpMyAdmin Simulation & SQL Query Console -->
+  <div class="cp-modal-backdrop" id="phpmyadminModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header pma-header">
+        <div class="modal-title-wrap">
+          <span class="pma-badge">phpMyAdmin</span>
+          <h3>SQL Query &amp; Table Explorer</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('phpmyadminModal')">&times;</button>
+      </div>
+      <div class="pma-body">
+        <div class="sql-console-wrap">
+          <label><strong>Run SQL query/queries on server "localhost":</strong></label>
+          <textarea id="sqlQueryInput" class="sql-textarea">SELECT * FROM `wp_posts` WHERE `post_status` = 'publish' LIMIT 10;</textarea>
+          <div class="sql-actions">
+            <button class="btn-primary" onclick="executeSqlQuery()"><i class="fa-solid fa-play"></i> Go (Execute)</button>
+            <button class="btn-outline" onclick="document.getElementById('sqlQueryInput').value='SHOW TABLES;'"><i class="fa-solid fa-list"></i> SHOW TABLES</button>
+            <button class="btn-outline" onclick="document.getElementById('sqlQueryInput').value='SHOW PROCESSLIST;'"><i class="fa-solid fa-heart-pulse"></i> SHOW PROCESSLIST</button>
+          </div>
+        </div>
+        <div class="sql-result-wrap" id="sqlResults">
+          <div class="query-success-msg"><i class="fa-solid fa-check"></i> Showing rows 0 - 2 (3 total, Query took 0.0014 seconds.)</div>
+          <table class="styled-table pma-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>post_title</th>
+                <th>post_status</th>
+                <th>post_date</th>
+                <th>comment_count</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td><strong>Welcome to your new cPanel Site</strong></td>
+                <td><span class="badge-success">publish</span></td>
+                <td>2026-11-10 14:22:00</td>
+                <td>0</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td><strong>Sample Page</strong></td>
+                <td><span class="badge-success">publish</span></td>
+                <td>2026-11-10 14:22:00</td>
+                <td>1</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td><strong>AutoSSL Integration Guide</strong></td>
+                <td><span class="badge-success">publish</span></td>
+                <td>2026-11-12 09:15:30</td>
+                <td>4</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('phpmyadminModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: DNS ZONE EDITOR -->
+  <div class="cp-modal-backdrop" id="dnsModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-network-wired modal-icon"></i>
+          <h3>Zone Editor &mdash; DNS Records Management</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('dnsModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <!-- Add DNS Record Form -->
+        <div class="card-section">
+          <h4><i class="fa-solid fa-plus-circle"></i> Add a Record</h4>
+          <div class="dns-form-grid">
+            <div>
+              <label>Name</label>
+              <input type="text" id="dnsName" placeholder="sub.example.com" class="styled-input">
+            </div>
+            <div>
+              <label>TTL</label>
+              <input type="number" id="dnsTtl" value="14400" class="styled-input">
+            </div>
+            <div>
+              <label>Type</label>
+              <select id="dnsType" class="styled-input">
+                <option value="A">A (Address)</option>
+                <option value="AAAA">AAAA (IPv6)</option>
+                <option value="CNAME">CNAME (Alias)</option>
+                <option value="MX">MX (Mail Exchange)</option>
+                <option value="TXT">TXT (Text / SPF)</option>
+              </select>
+            </div>
+            <div>
+              <label>Record / Value</label>
+              <input type="text" id="dnsRecord" placeholder="192.168.1.100 or host" class="styled-input">
+            </div>
+          </div>
+          <div style="margin-top: 1rem; text-align: right;">
+            <button class="btn-primary" onclick="createDnsRecord()"><i class="fa-solid fa-plus"></i> Add Record</button>
+          </div>
+        </div>
+
+        <!-- DNS Records Table -->
+        <div class="card-section">
+          <h4><i class="fa-solid fa-list"></i> Zone Records for example.com</h4>
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>TTL</th>
+                <th>Type</th>
+                <th>Record Value</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="dnsTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('dnsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 5: EMAIL ACCOUNTS -->
+  <div class="cp-modal-backdrop" id="emailModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-envelope modal-icon"></i>
+          <h3>Email Accounts Management</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('emailModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <!-- Create Email Form -->
+        <div class="card-section">
+          <h4><i class="fa-solid fa-user-plus"></i> Create an Email Account</h4>
+          <div class="form-grid-3">
+            <div>
+              <label>Username</label>
+              <div class="input-suffix-group">
+                <input type="text" id="emailUser" placeholder="username" class="styled-input">
+                <span class="input-suffix">@example.com</span>
+              </div>
+            </div>
+            <div>
+              <label>Password</label>
+              <input type="password" id="emailPass" placeholder="Secure password" class="styled-input">
+            </div>
+            <div>
+              <label>Storage Quota</label>
+              <select id="emailQuota" class="styled-input">
+                <option value="500 MB">500 MB</option>
+                <option value="1024 MB">1,024 MB (1 GB)</option>
+                <option value="2048 MB">2,048 MB (2 GB)</option>
+                <option value="Unlimited">Unlimited</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top: 1rem; text-align: right;">
+            <button class="btn-primary" onclick="createEmailAccount()"><i class="fa-solid fa-plus"></i> + Create Account</button>
+          </div>
+        </div>
+
+        <!-- Email Accounts Table -->
+        <div class="card-section">
+          <h4><i class="fa-solid fa-users"></i> Active Email Accounts</h4>
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Account</th>
+                <th>Storage Usage / Quota</th>
+                <th>Last Access</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="emailTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-outline" onclick="openModal('webmailModal')"><i class="fa-solid fa-inbox"></i> Open Webmail</button>
+        <button class="btn-secondary" onclick="closeModal('emailModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 6: WEBMAIL SIMULATION -->
+  <div class="cp-modal-backdrop" id="webmailModal">
+    <div class="cp-modal-window modal-wide webmail-window">
+      <div class="modal-header webmail-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-inbox modal-icon"></i>
+          <h3>Roundcube Webmail &mdash; admin@example.com</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('webmailModal')">&times;</button>
+      </div>
+      <div class="webmail-layout">
+        <div class="webmail-folders">
+          <button class="wm-folder active"><i class="fa-solid fa-inbox"></i> Inbox (2)</button>
+          <button class="wm-folder"><i class="fa-solid fa-paper-plane"></i> Sent</button>
+          <button class="wm-folder"><i class="fa-solid fa-file-lines"></i> Drafts</button>
+          <button class="wm-folder"><i class="fa-solid fa-trash"></i> Trash</button>
+          <button class="wm-folder"><i class="fa-solid fa-triangle-exclamation"></i> Junk</button>
+        </div>
+        <div class="webmail-inbox">
+          <div class="mail-item unread">
+            <div class="mail-sender"><strong>cPanel AutoSSL Notification</strong></div>
+            <div class="mail-subject">SSL Certificate auto-renewed successfully for example.com</div>
+            <div class="mail-date">10:14 AM</div>
+          </div>
+          <div class="mail-item unread">
+            <div class="mail-sender"><strong>Security Advisor</strong></div>
+            <div class="mail-subject">Server report: 0 vulnerabilities found, CSF Firewall active</div>
+            <div class="mail-date">Yesterday</div>
+          </div>
+          <div class="mail-item">
+            <div class="mail-sender"><strong>WordPress Auto-Updater</strong></div>
+            <div class="mail-subject">WordPress 6.7.1 updated automatically</div>
+            <div class="mail-date">Nov 14</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('webmailModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 7: WEB TERMINAL -->
+  <div class="cp-modal-backdrop" id="terminalModal">
+    <div class="cp-modal-window modal-wide terminal-window">
+      <div class="modal-header terminal-top">
+        <div class="modal-title-wrap">
+          <div class="term-dots">
+            <span class="dot dot-red" onclick="closeModal('terminalModal')"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
+          </div>
+          <h3 class="term-title">cPanel Virtual Terminal &mdash; cpanel_admin@cpanel-server: ~</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('terminalModal')">&times;</button>
+      </div>
+      <div class="terminal-screen" id="terminalScreen" onclick="focusTerminalInput()">
+        <div class="term-line banner-line">Welcome to cPanel Terminal Emulator v2.4.0</div>
+        <div class="term-line banner-line">Type '<span class="highlight-text">help</span>' to list available system commands. Try: uptime, ls, pwd, cat index.html, free -m</div>
+        <div class="term-output" id="terminalLog"></div>
+        <div class="term-prompt-line">
+          <span class="prompt-user">cpanel_admin@server</span>:<span class="prompt-path">~/public_html</span>$
+          <input type="text" id="terminalInput" class="term-input" autocomplete="off" spellcheck="false">
+        </div>
+      </div>
+      <div class="modal-footer term-footer">
+        <span class="term-shortcuts">Enter to execute | Up/Down for history | Type 'clear' to clear</span>
+        <button class="btn-secondary" onclick="closeModal('terminalModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 8: SOFTACULOUS APP INSTALLER -->
+  <div class="cp-modal-backdrop" id="softaculousModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-rocket modal-icon"></i>
+          <h3>Softaculous 1-Click App Installer</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('softaculousModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <h4>Top Applications</h4>
+        <div class="app-catalog-grid">
+          <div class="app-card" onclick="selectAppToInstall('WordPress', '6.7.1', 'The world’s most popular CMS and blogging platform.')">
+            <div class="app-card-icon"><i class="fa-brands fa-wordpress"></i></div>
+            <div class="app-card-meta">
+              <h5>WordPress</h5>
+              <span>v6.7.1</span>
+              <p>CMS / Blog</p>
+            </div>
+            <button class="btn-sm btn-primary">Install</button>
+          </div>
+          <div class="app-card" onclick="selectAppToInstall('Node.js App', '20.x LTS', 'Fast event-driven JavaScript server framework.')">
+            <div class="app-card-icon node-icon"><i class="fa-brands fa-node-js"></i></div>
+            <div class="app-card-meta">
+              <h5>Node.js App</h5>
+              <span>v20.x LTS</span>
+              <p>Framework</p>
+            </div>
+            <button class="btn-sm btn-primary">Install</button>
+          </div>
+          <div class="app-card" onclick="selectAppToInstall('Laravel', '11.x', 'The PHP framework for web artisans.')">
+            <div class="app-card-icon laravel-icon"><i class="fa-brands fa-laravel"></i></div>
+            <div class="app-card-meta">
+              <h5>Laravel</h5>
+              <span>v11.x</span>
+              <p>PHP Framework</p>
+            </div>
+            <button class="btn-sm btn-primary">Install</button>
+          </div>
+          <div class="app-card" onclick="selectAppToInstall('phpBB', '3.3.11', 'Leading bulletin board and community software.')">
+            <div class="app-card-icon phpbb-icon"><i class="fa-solid fa-comments"></i></div>
+            <div class="app-card-meta">
+              <h5>phpBB</h5>
+              <span>v3.3.11</span>
+              <p>Forums</p>
+            </div>
+            <button class="btn-sm btn-primary">Install</button>
+          </div>
+        </div>
+
+        <!-- Installation Configuration Form -->
+        <div class="card-section" id="appInstallSection" style="margin-top: 1.5rem; display: none;">
+          <h4 id="installAppNameTitle"><i class="fa-solid fa-cog"></i> Install Application</h4>
+          <div class="dns-form-grid">
+            <div>
+              <label>Choose Protocol &amp; Domain</label>
+              <select id="installDomain" class="styled-input">
+                <option value="https://example.com">https://example.com</option>
+                <option value="https://blog.example.com">https://blog.example.com</option>
+              </select>
+            </div>
+            <div>
+              <label>In Directory (leave blank for root)</label>
+              <input type="text" id="installDir" placeholder="e.g. blog or shop" class="styled-input">
+            </div>
+            <div>
+              <label>Admin Username</label>
+              <input type="text" id="installUser" value="admin" class="styled-input">
+            </div>
+            <div>
+              <label>Admin Password</label>
+              <input type="password" id="installPass" value="SecretP@ssword2026!" class="styled-input">
+            </div>
+          </div>
+          <div style="margin-top: 1rem; text-align: right;">
+            <button class="btn-primary" id="btnRunInstall" onclick="executeAppInstall()"><i class="fa-solid fa-download"></i> Install Now</button>
+          </div>
+          <div id="installProgressWrap" style="display: none; margin-top: 1rem;">
+            <div class="stat-progress-bar">
+              <div class="stat-fill fill-blue" id="installProgressFill" style="width: 0%;"></div>
+            </div>
+            <span id="installProgressText" style="font-size: 0.85rem; color: #64748b; margin-top: 4px; display: block;">Preparing installation...</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('softaculousModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 9: CRON JOBS -->
+  <div class="cp-modal-backdrop" id="cronModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-clock modal-icon"></i>
+          <h3>Cron Jobs &mdash; Task Scheduler</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('cronModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <div class="card-section">
+          <h4><i class="fa-solid fa-plus-circle"></i> Add New Cron Job</h4>
+          <div class="cron-form-grid">
+            <div>
+              <label>Common Settings</label>
+              <select id="cronPreset" class="styled-input" onchange="applyCronPreset()">
+                <option value="custom">-- Common Settings --</option>
+                <option value="* * * * *">Once Per Minute (* * * * *)</option>
+                <option value="0 * * * *">Once Per Hour (0 * * * *)</option>
+                <option value="0 0 * * *">Once Per Day at midnight (0 0 * * *)</option>
+                <option value="0 0 * * 0">Once Per Week on Sunday (0 0 * * 0)</option>
+                <option value="0 0 1 * *">Once Per Month on the 1st (0 0 1 * *)</option>
+              </select>
+            </div>
+            <div>
+              <label>Schedule Expression</label>
+              <input type="text" id="cronSchedule" value="0 0 * * *" class="styled-input code-font">
+            </div>
+          </div>
+          <div style="margin-top: 0.75rem;">
+            <label>Command to Execute</label>
+            <input type="text" id="cronCmd" placeholder="/usr/local/bin/php /home/user/public_html/cron.php" class="styled-input code-font">
+          </div>
+          <div style="margin-top: 1rem; text-align: right;">
+            <button class="btn-primary" onclick="createCronJob()"><i class="fa-solid fa-plus"></i> Add New Cron Job</button>
+          </div>
+        </div>
+
+        <div class="card-section">
+          <h4><i class="fa-solid fa-list-check"></i> Current Cron Jobs</h4>
+          <table class="styled-table">
+            <thead>
+              <tr>
+                <th>Schedule</th>
+                <th>Command</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="cronTableBody">
+              <!-- Populated by JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('cronModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 10: SSL/TLS STATUS -->
+  <div class="cp-modal-backdrop" id="sslModal">
+    <div class="cp-modal-window modal-wide">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-certificate modal-icon"></i>
+          <h3>SSL/TLS Status &amp; AutoSSL</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('sslModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <div class="ssl-banner">
+          <div>
+            <h4><i class="fa-solid fa-shield-halved"></i> AutoSSL is Active</h4>
+            <p>cPanel automatically provisions free Let's Encrypt DV certificates for all hosted domains.</p>
+          </div>
+          <button class="btn-primary" id="btnRunAutoSSL" onclick="runAutoSslSimulation()"><i class="fa-solid fa-rotate"></i> Run AutoSSL</button>
+        </div>
+
+        <table class="styled-table" style="margin-top: 1.5rem;">
+          <thead>
+            <tr>
+              <th>Domain</th>
+              <th>Certificate Type</th>
+              <th>Expiry Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>example.com</strong></td>
+              <td>Let's Encrypt Authority X3 (RSA 2048)</td>
+              <td>In 78 days (Feb 2027)</td>
+              <td><span class="badge-success"><i class="fa-solid fa-check"></i> AutoSSL Domain Validated</span></td>
+            </tr>
+            <tr>
+              <td><strong>www.example.com</strong></td>
+              <td>Let's Encrypt Authority X3 (RSA 2048)</td>
+              <td>In 78 days (Feb 2027)</td>
+              <td><span class="badge-success"><i class="fa-solid fa-check"></i> AutoSSL Domain Validated</span></td>
+            </tr>
+            <tr>
+              <td><strong>mail.example.com</strong></td>
+              <td>Let's Encrypt Authority X3 (RSA 2048)</td>
+              <td>In 78 days (Feb 2027)</td>
+              <td><span class="badge-success"><i class="fa-solid fa-check"></i> AutoSSL Domain Validated</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('sslModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 11: BACKUP WIZARD -->
+  <div class="cp-modal-backdrop" id="backupModal">
+    <div class="cp-modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-box-archive modal-icon"></i>
+          <h3>Backup Wizard</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('backupModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <p>You can download a compressed copy of all or part of your website to save on your local computer.</p>
+        <div class="backup-options">
+          <div class="backup-card" onclick="simulateBackupDownload('Full Backup (cpanel-backup-all.tar.gz)')">
+            <i class="fa-solid fa-file-zipper backup-icon"></i>
+            <h5>Full Backup</h5>
+            <p>Archive of all files, home directory, databases, email forwarders and filters.</p>
+            <button class="btn-primary btn-sm">Download Full Backup</button>
+          </div>
+          <div class="backup-card" onclick="simulateBackupDownload('Home Directory (home-backup.tar.gz)')">
+            <i class="fa-solid fa-folder-open backup-icon"></i>
+            <h5>Home Directory Only</h5>
+            <p>Archive containing only files inside /public_html and configuration files.</p>
+            <button class="btn-outline btn-sm">Download Home Directory</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('backupModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Scripts -->
+  <script src="js/app.js"></script>
+</body>
+</html>
