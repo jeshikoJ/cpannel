@@ -160,6 +160,66 @@ let cpanelData = {
   installed_apps: [
     { id: 'app-1', name: 'WordPress', version: '6.7.1', domain: 'example.com', path: '/', installedOn: '2026-10-15', status: 'Healthy' },
     { id: 'app-2', name: 'Node.js App', version: '20.x', domain: 'api.example.com', path: '/api', installedOn: '2026-11-02', status: 'Running' }
+  ],
+  deployments: [
+    {
+      id: 'DEP-1048',
+      domain: 'example.com',
+      environment: 'Production',
+      target: 'AWS App Runner',
+      commit: '873031d',
+      commitMsg: 'Add Render, Docker, and Vercel hosting configurations',
+      author: 'jeshikoJ',
+      branch: 'main',
+      status: 'SUCCESS',
+      timestamp: '2026-11-18 12:01:48',
+      duration: '34s',
+      logs: [
+        '[AWS-DevOps] Triggered by GitHub push to origin/main (commit 873031d)',
+        '[AWS-CodeBuild] Fetching source code from github.com/jeshikoJ/cpannel...',
+        '[AWS-CodeBuild] Running pre-build security & dependency scan: PASSED',
+        '[AWS-CodeBuild] Building Docker image tag cpannel:873031d...',
+        '[AWS-ECR] Pushing image to 123456789012.dkr.ecr.us-east-1.amazonaws.com/cpannel:873031d',
+        '[AWS-AppRunner] Starting service deployment & health probe...',
+        '[AWS-AppRunner] HTTP 200 OK received on port 2083. Deployment successful!',
+        '[AWS-DevOps] Deployment completed in 34 seconds.'
+      ]
+    },
+    {
+      id: 'DEP-1047',
+      domain: 'example.com',
+      environment: 'Production',
+      target: 'AWS App Runner',
+      commit: '86e17f2',
+      commitMsg: 'Initial commit: Modern cPanel Web Hosting Control Panel',
+      author: 'jeshikoJ',
+      branch: 'main',
+      status: 'SUCCESS',
+      timestamp: '2026-11-18 11:58:58',
+      duration: '41s',
+      logs: [
+        '[AWS-DevOps] Initial repository sync from GitHub origin/main',
+        '[AWS-CodeBuild] Container build passed',
+        '[AWS-AppRunner] Provisioned service cluster'
+      ]
+    },
+    {
+      id: 'DEP-1046',
+      domain: 'staging.example.com',
+      environment: 'Staging',
+      target: 'AWS ECS Fargate',
+      commit: '75a92d1',
+      commitMsg: 'Test staging environment configuration',
+      author: 'dev-team',
+      branch: 'develop',
+      status: 'SUCCESS',
+      timestamp: '2026-11-17 18:22:10',
+      duration: '29s',
+      logs: [
+        '[AWS-ECS] Task definition updated to v4',
+        '[AWS-ALB] Target health check 200 OK'
+      ]
+    }
   ]
 };
 
@@ -646,6 +706,88 @@ Swap:           4096         120        3976`
       } catch (e) {
         return sendJson(res, { error: e.message }, 500);
       }
+    }
+  }
+
+  // 10. Deployments & AWS DevOps Tracking APIs
+  if (pathname === '/api/deployments' && req.method === 'GET') {
+    return sendJson(res, { deployments: cpanelData.deployments || [] });
+  }
+
+  if (pathname === '/api/deployments/trigger' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req);
+      const domain = body.domain || 'example.com';
+      const branch = body.branch || 'main';
+      const env = body.environment || 'Production';
+      const newId = `DEP-${1049 + (cpanelData.deployments?.length || 0)}`;
+      const shortHash = Math.random().toString(16).substring(2, 9);
+
+      const newRecord = {
+        id: newId,
+        domain: domain,
+        environment: env,
+        target: 'AWS App Runner',
+        commit: shortHash,
+        commitMsg: body.commitMsg || `Automated deployment from ${branch}`,
+        author: body.author || 'cpanel_admin',
+        branch: branch,
+        status: 'SUCCESS',
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        duration: `${Math.floor(Math.random() * 20) + 25}s`,
+        logs: [
+          `[AWS-DevOps] Triggered pipeline for domain ${domain} (${branch})`,
+          `[AWS-CodePipeline] Source action completed for commit ${shortHash}`,
+          `[AWS-CodeBuild] Running container build and vulnerability test`,
+          `[AWS-ECR] Pushed tagged container image cpannel:${shortHash}`,
+          `[AWS-AppRunner] Updating live service environment`,
+          `[AWS-AppRunner] Health check OK. Zero-downtime deployment finished.`
+        ]
+      };
+
+      if (!cpanelData.deployments) cpanelData.deployments = [];
+      cpanelData.deployments.unshift(newRecord);
+      persistData();
+      return sendJson(res, { success: true, deployment: newRecord, deployments: cpanelData.deployments });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 500);
+    }
+  }
+
+  if (pathname === '/api/deployments/rollback' && req.method === 'POST') {
+    try {
+      const body = await parseJsonBody(req);
+      const targetId = body.id;
+      const target = (cpanelData.deployments || []).find(d => d.id === targetId);
+      if (!target) {
+        return sendJson(res, { error: 'Deployment record not found' }, 404);
+      }
+
+      const rollbackId = `DEP-${1050 + (cpanelData.deployments?.length || 0)}`;
+      const rollbackRecord = {
+        id: rollbackId,
+        domain: target.domain,
+        environment: target.environment,
+        target: target.target,
+        commit: target.commit,
+        commitMsg: `Rollback to ${target.id} (${target.commit})`,
+        author: 'cpanel_admin (Rollback)',
+        branch: target.branch,
+        status: 'ROLLED_BACK',
+        timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+        duration: '18s',
+        logs: [
+          `[AWS-DevOps] Rollback requested for domain ${target.domain}`,
+          `[AWS-AppRunner] Pointing active traffic to previous stable image tag cpannel:${target.commit}`,
+          `[AWS-AppRunner] Health checks validated. Service restored successfully.`
+        ]
+      };
+
+      cpanelData.deployments.unshift(rollbackRecord);
+      persistData();
+      return sendJson(res, { success: true, deployment: rollbackRecord, deployments: cpanelData.deployments });
+    } catch (e) {
+      return sendJson(res, { error: e.message }, 500);
     }
   }
 

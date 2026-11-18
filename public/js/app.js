@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadDnsRecords();
   loadEmails();
   loadCronJobs();
+  loadDeployments();
   fmLoad('');
 
   // Quick navigation buttons
@@ -997,3 +998,179 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+/* ==========================================================================
+   AWS DevOps & Deployment Tracking Module
+   ========================================================================== */
+
+let allDeployments = [];
+
+async function loadDeployments() {
+  try {
+    const res = await fetch('/api/deployments');
+    const data = await res.json();
+    allDeployments = data.deployments || [];
+    renderDeployments(allDeployments);
+  } catch (err) {
+    console.error('Failed to load deployments:', err);
+  }
+}
+
+function openDeploymentsModal() {
+  openModal('deploymentsModal');
+  loadDeployments();
+}
+
+function renderDeployments(list) {
+  const tbody = document.getElementById('deploymentsTableBody');
+  const countLabel = document.getElementById('statTotalDeploys');
+  if (countLabel) countLabel.innerText = list.length;
+  if (!tbody) return;
+
+  if (list.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 2rem; color: var(--text-muted);">No deployment records found</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = '';
+  list.forEach(dep => {
+    const tr = document.createElement('tr');
+
+    let badgeClass = 'badge-status-success';
+    let badgeText = dep.status;
+    let badgeIcon = 'fa-solid fa-check';
+
+    if (dep.status === 'ROLLED_BACK') {
+      badgeClass = 'badge-status-rollback';
+      badgeText = 'ROLLED BACK';
+      badgeIcon = 'fa-solid fa-rotate-left';
+    } else if (dep.status === 'IN_PROGRESS') {
+      badgeClass = 'badge-status-inprogress';
+      badgeText = 'IN PROGRESS';
+      badgeIcon = 'fa-solid fa-spinner fa-spin';
+    } else if (dep.status === 'FAILED') {
+      badgeClass = 'badge-status-failed';
+      badgeText = 'FAILED';
+      badgeIcon = 'fa-solid fa-triangle-exclamation';
+    }
+
+    tr.innerHTML = `
+      <td>
+        <span class="code-font" style="font-weight: 700; color: var(--accent-cp);">${escapeHtml(dep.id)}</span>
+      </td>
+      <td>
+        <strong>${escapeHtml(dep.domain)}</strong>
+        <span style="display: block; font-size: 0.72rem; color: var(--text-muted);">${escapeHtml(dep.environment)}</span>
+      </td>
+      <td>
+        <span style="font-size: 0.8rem; font-weight: 500; color: #ff9900;"><i class="fa-brands fa-aws"></i> ${escapeHtml(dep.target)}</span>
+      </td>
+      <td>
+        <div style="font-size: 0.82rem; font-weight: 500; color: var(--text-primary);">${escapeHtml(dep.commitMsg)}</div>
+        <div style="font-size: 0.72rem; color: var(--text-muted);" class="code-font">
+          <i class="fa-solid fa-code-branch"></i> ${escapeHtml(dep.branch)} &bull; 
+          <a href="https://github.com/jeshikoJ/cpannel/commit/${dep.commit}" target="_blank" style="color: var(--accent-blue); text-decoration: none;">${escapeHtml(dep.commit.slice(0, 7))}</a> by ${escapeHtml(dep.author)}
+        </div>
+      </td>
+      <td>
+        <span class="${badgeClass}"><i class="${badgeIcon}"></i> ${badgeText}</span>
+      </td>
+      <td>
+        <div style="font-size: 0.8rem;">${escapeHtml(dep.timestamp)}</div>
+        <span style="font-size: 0.72rem; color: var(--text-muted);">Duration: ${escapeHtml(dep.duration)}</span>
+      </td>
+      <td>
+        <div style="display: flex; gap: 0.35rem;">
+          <button class="btn-sm btn-outline" onclick="viewDeploymentLogs('${escapeHtml(dep.id)}')" title="View Build Logs"><i class="fa-solid fa-file-lines"></i> Logs</button>
+          ${dep.status !== 'ROLLED_BACK' ? `<button class="btn-sm btn-outline danger" onclick="rollbackDeployment('${escapeHtml(dep.id)}')" title="Rollback this version"><i class="fa-solid fa-rotate-left"></i></button>` : ''}
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function filterDeployments() {
+  const filter = document.getElementById('deployDomainFilter').value;
+  if (filter === 'all') {
+    renderDeployments(allDeployments);
+  } else {
+    renderDeployments(allDeployments.filter(d => d.domain === filter));
+  }
+}
+
+function viewDeploymentLogs(depId) {
+  const dep = allDeployments.find(d => d.id === depId);
+  if (!dep) return;
+
+  document.getElementById('deployLogsTitle').innerText = `${dep.id} (${dep.domain} - ${dep.target})`;
+  const logContainer = document.getElementById('deployLogsOutput');
+
+  const logLines = (dep.logs || [
+    `[AWS-DevOps] Log stream recorded for ${dep.id}`,
+    `[AWS-CodeBuild] Completed with status ${dep.status}`
+  ]).map(line => {
+    return `<div class="log-line"><span class="log-tag">${line.split(' ')[0]}</span> <span>${escapeHtml(line.slice(line.indexOf(' ') + 1))}</span></div>`;
+  }).join('');
+
+  logContainer.innerHTML = logLines;
+  openModal('deployLogsModal');
+}
+
+async function submitNewDeployment() {
+  const domain = document.getElementById('newDeployDomain').value;
+  const branch = document.getElementById('newDeployBranch').value.trim() || 'main';
+  const target = document.getElementById('newDeployTarget').value;
+  const msg = document.getElementById('newDeployMsg').value.trim() || `Production deployment of ${branch}`;
+
+  closeModal('triggerDeployModal');
+  showToast(`Initiating AWS DevOps deployment for ${domain}...`);
+
+  try {
+    const res = await fetch('/api/deployments/trigger', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        domain,
+        branch,
+        target,
+        commitMsg: msg,
+        author: 'jeshikoJ',
+        environment: domain.startsWith('staging') ? 'Staging' : 'Production'
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      allDeployments = data.deployments;
+      renderDeployments(allDeployments);
+      showToast(`Deployment ${data.deployment.id} to ${target} succeeded!`);
+      viewDeploymentLogs(data.deployment.id);
+    }
+  } catch (err) {
+    showToast('Failed to trigger deployment: ' + err.message, 'error');
+  }
+}
+
+async function rollbackDeployment(depId) {
+  if (!confirm(`Are you sure you want to rollback to deployment ${depId}? This will immediately point live AWS traffic back to that release.`)) return;
+
+  showToast(`Executing rollback to ${depId}...`);
+  try {
+    const res = await fetch('/api/deployments/rollback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: depId })
+    });
+    const data = await res.json();
+    if (data.success) {
+      allDeployments = data.deployments;
+      renderDeployments(allDeployments);
+      showToast(`Successfully rolled back to ${depId}!`);
+    } else {
+      showToast(data.error || 'Rollback failed', 'error');
+    }
+  } catch (err) {
+    showToast('Rollback failed: ' + err.message, 'error');
+  }
+}
+

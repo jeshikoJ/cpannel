@@ -25,6 +25,10 @@
     </div>
 
     <div class="cp-header-right">
+      <button class="nav-btn" onclick="openDeploymentsModal()" title="AWS DevOps Deployment Tracker">
+        <i class="fa-solid fa-cloud-arrow-up"></i>
+        <span class="btn-text">Deployments</span>
+      </button>
       <button class="nav-btn icon-btn" id="btnTerminalQuick" title="Open Terminal">
         <i class="fa-solid fa-terminal"></i>
         <span class="btn-text">Terminal</span>
@@ -323,6 +327,50 @@
             <div class="tool-meta">
               <span class="tool-title">WordPress Manager</span>
               <span class="tool-desc">Manage WP instances, plugins &amp; updates</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Category: DevOps & Deployments -->
+      <section class="tool-category-card" data-category="devops">
+        <div class="category-header">
+          <div class="cat-title-wrap">
+            <i class="fa-solid fa-cloud-arrow-up cat-icon cat-devops"></i>
+            <h2>AWS DevOps &amp; Deployments</h2>
+          </div>
+          <span class="cat-item-count">4 items</span>
+        </div>
+        <div class="tools-grid">
+          <div class="tool-item" onclick="openDeploymentsModal()">
+            <div class="tool-icon-box"><i class="fa-solid fa-clock-rotate-left"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Deployments Tracker</span>
+              <span class="tool-desc">Audit website releases, status, logs &amp; rollbacks</span>
+            </div>
+            <span class="tool-tag popular">AWS DevOps</span>
+          </div>
+          <div class="tool-item" onclick="openDeploymentsModal()">
+            <div class="tool-icon-box"><i class="fa-brands fa-aws"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">AWS App Runner &amp; ECS</span>
+              <span class="tool-desc">Manage cloud container services &amp; health</span>
+            </div>
+            <span class="tool-tag active">Online</span>
+          </div>
+          <div class="tool-item" onclick="window.open('https://github.com/jeshikoJ/cpannel', '_blank')">
+            <div class="tool-icon-box"><i class="fa-brands fa-github"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">GitHub Actions CI/CD</span>
+              <span class="tool-desc">Connected to jeshikoJ/cpannel</span>
+            </div>
+            <span class="tool-tag direct">Synced</span>
+          </div>
+          <div class="tool-item" onclick="openDeploymentsModal()">
+            <div class="tool-icon-box"><i class="fa-solid fa-terminal"></i></div>
+            <div class="tool-meta">
+              <span class="tool-title">Build &amp; Deploy Logs</span>
+              <span class="tool-desc">Inspect AWS CodeBuild &amp; pipeline console output</span>
             </div>
           </div>
         </div>
@@ -1151,6 +1199,148 @@
       </div>
       <div class="modal-footer">
         <button class="btn-secondary" onclick="closeModal('backupModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 12: DEPLOYMENTS & HOSTING TRACKER -->
+  <div class="cp-modal-backdrop" id="deploymentsModal">
+    <div class="cp-modal-window modal-wide" style="max-width: 1100px;">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-cloud-arrow-up modal-icon" style="color: #ff6c2c;"></i>
+          <h3>AWS DevOps &amp; Website Deployment Tracker</h3>
+        </div>
+        <div class="modal-actions-right">
+          <button class="btn-sm btn-primary" onclick="openModal('triggerDeployModal')"><i class="fa-solid fa-play"></i> + Trigger New Deployment</button>
+          <button class="modal-close-btn" onclick="closeModal('deploymentsModal')">&times;</button>
+        </div>
+      </div>
+      <div class="modal-tab-content">
+
+        <!-- Deployment Stats Cards -->
+        <div class="dns-form-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 0.5rem;">
+          <div class="card-section" style="padding: 0.75rem 1rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Total Releases</span>
+            <strong style="font-size: 1.3rem; color: var(--text-primary);" id="statTotalDeploys">0</strong>
+          </div>
+          <div class="card-section" style="padding: 0.75rem 1rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Cloud Provider</span>
+            <strong style="font-size: 1.1rem; color: #ff9900;"><i class="fa-brands fa-aws"></i> AWS Cloud</strong>
+          </div>
+          <div class="card-section" style="padding: 0.75rem 1rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Active Target</span>
+            <strong style="font-size: 1.05rem; color: var(--accent-blue);">App Runner</strong>
+          </div>
+          <div class="card-section" style="padding: 0.75rem 1rem;">
+            <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Success Rate</span>
+            <strong style="font-size: 1.3rem; color: var(--accent-green);">100%</strong>
+          </div>
+        </div>
+
+        <!-- Filter & Search Toolbar -->
+        <div class="fm-toolbar" style="border-radius: var(--radius-sm); margin-bottom: 0.75rem; justify-content: space-between;">
+          <div style="display: flex; gap: 0.6rem; align-items: center;">
+            <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Filter Domain:</label>
+            <select id="deployDomainFilter" class="styled-input" style="width: auto; padding: 0.35rem 0.65rem;" onchange="filterDeployments()">
+              <option value="all">All Domains &amp; Subdomains</option>
+              <option value="example.com">example.com (Production)</option>
+              <option value="staging.example.com">staging.example.com (Staging)</option>
+            </select>
+          </div>
+          <div>
+            <span class="code-font" style="font-size: 0.76rem; color: var(--text-muted);"><i class="fa-brands fa-github"></i> Repository: <strong>jeshikoJ/cpannel</strong></span>
+          </div>
+        </div>
+
+        <!-- Deployments Table -->
+        <div class="card-section" style="padding: 0; overflow: hidden;">
+          <table class="styled-table" id="deploymentsTable">
+            <thead>
+              <tr>
+                <th width="12%">Deploy ID</th>
+                <th width="16%">Website / Domain</th>
+                <th width="14%">AWS Target</th>
+                <th width="24%">Commit &amp; Source</th>
+                <th width="12%">Status</th>
+                <th width="12%">Date &amp; Duration</th>
+                <th width="10%">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="deploymentsTableBody">
+              <tr><td colspan="7" class="loading-cell">Loading deployments audit log...</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <span style="color: var(--text-muted);">Webhook endpoint: <code class="code-font" style="color: var(--accent-cp);">/api/deployments/webhook</code></span>
+        <button class="btn-secondary" onclick="closeModal('deploymentsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 13: BUILD & DEPLOY LOGS VIEWER -->
+  <div class="cp-modal-backdrop" id="deployLogsModal">
+    <div class="cp-modal-window modal-wide terminal-window">
+      <div class="modal-header terminal-top">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-terminal modal-icon"></i>
+          <h3 class="term-title">AWS Pipeline Build Logs &mdash; <span id="deployLogsTitle">#DEP-1048</span></h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('deployLogsModal')">&times;</button>
+      </div>
+      <div class="terminal-screen" style="max-height: 480px; min-height: 350px;">
+        <div class="term-line banner-line">[AWS-DevOps] Log stream from CloudWatch &amp; CodeBuild</div>
+        <div class="term-output" id="deployLogsOutput" style="color: #38bdf8; font-size: 0.84rem; line-height: 1.6;"></div>
+      </div>
+      <div class="modal-footer term-footer">
+        <span class="term-shortcuts">Live streaming complete | Exit code 0</span>
+        <button class="btn-secondary" onclick="closeModal('deployLogsModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 14: TRIGGER NEW DEPLOYMENT -->
+  <div class="cp-modal-backdrop" id="triggerDeployModal">
+    <div class="cp-modal-window">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <i class="fa-solid fa-play modal-icon"></i>
+          <h3>Trigger Deployment to AWS</h3>
+        </div>
+        <button class="modal-close-btn" onclick="closeModal('triggerDeployModal')">&times;</button>
+      </div>
+      <div class="modal-tab-content">
+        <div>
+          <label style="display: block; font-size: 0.8rem; margin-bottom: 0.35rem; color: var(--text-secondary);">Select Domain / Hosted Site</label>
+          <select id="newDeployDomain" class="styled-input">
+            <option value="example.com">example.com (Root Domain)</option>
+            <option value="staging.example.com">staging.example.com (Staging)</option>
+            <option value="api.example.com">api.example.com (API Service)</option>
+          </select>
+        </div>
+        <div style="margin-top: 0.8rem;">
+          <label style="display: block; font-size: 0.8rem; margin-bottom: 0.35rem; color: var(--text-secondary);">Git Branch / Ref</label>
+          <input type="text" id="newDeployBranch" value="main" class="styled-input code-font">
+        </div>
+        <div style="margin-top: 0.8rem;">
+          <label style="display: block; font-size: 0.8rem; margin-bottom: 0.35rem; color: var(--text-secondary);">Deployment Target</label>
+          <select id="newDeployTarget" class="styled-input">
+            <option value="AWS App Runner">AWS App Runner (Managed Containers)</option>
+            <option value="AWS ECS Fargate">AWS ECS Fargate</option>
+            <option value="AWS S3 + CloudFront">AWS S3 + CloudFront CDN</option>
+          </select>
+        </div>
+        <div style="margin-top: 0.8rem;">
+          <label style="display: block; font-size: 0.8rem; margin-bottom: 0.35rem; color: var(--text-secondary);">Release Notes / Commit Message</label>
+          <input type="text" id="newDeployMsg" placeholder="e.g. Deploy release v1.0.4 with performance updates" class="styled-input">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" onclick="closeModal('triggerDeployModal')">Cancel</button>
+        <button class="btn-primary" onclick="submitNewDeployment()"><i class="fa-solid fa-cloud-arrow-up"></i> Start Deployment Pipeline</button>
       </div>
     </div>
   </div>
