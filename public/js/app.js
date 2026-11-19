@@ -164,9 +164,86 @@ async function fetchStats() {
       document.getElementById('inodeNumbers').innerText = `${inodes.used.toLocaleString()} / ${inodes.limit.toLocaleString()}`;
       document.getElementById('inodeFill').style.width = `${Math.max(inodes.usagePercent, 1)}%`;
     }
+    // Settings — primary domain, IP, user
+    if (data.settings) {
+      const domain = data.settings.primaryDomain || 'localhost';
+      const ip = data.settings.sharedIp || '';
+
+      // Sidebar info panel
+      const infoDomain = document.getElementById('infoDomain');
+      if (infoDomain) infoDomain.innerText = domain;
+      const infoIp2 = document.getElementById('infoIp');
+      if (infoIp2 && ip) infoIp2.innerText = ip;
+
+      // Email suffix (@domain)
+      const emailSuffix = document.getElementById('emailDomainSuffix');
+      if (emailSuffix) emailSuffix.innerText = `@${domain}`;
+
+      // SSL primary domain label
+      const sslLabel = document.getElementById('sslPrimaryDomain');
+      if (sslLabel) sslLabel.innerText = domain;
+
+      // Softaculous domain select
+      const installDomain = document.getElementById('installDomain');
+      if (installDomain && installDomain.options.length === 1) {
+        installDomain.options[0].value = `http://${domain}`;
+        installDomain.options[0].text = `http://${domain}`;
+      }
+
+      // Trigger deploy domain select
+      const triggerDomain = document.getElementById('newDeployDomain');
+      if (triggerDomain && triggerDomain.options.length === 3) {
+        triggerDomain.options[0].value = domain;
+        triggerDomain.options[0].text = `${domain} (Root Domain)`;
+        triggerDomain.options[1].value = `staging.${domain}`;
+        triggerDomain.options[1].text = `staging.${domain} (Staging)`;
+        triggerDomain.options[2].value = `api.${domain}`;
+        triggerDomain.options[2].text = `api.${domain} (API Service)`;
+      }
+
+      // Deploy filter domain select
+      const deployFilter = document.getElementById('deployDomainFilter');
+      if (deployFilter && deployFilter.options.length === 1) {
+        const opt = document.createElement('option');
+        opt.value = domain;
+        opt.text = `${domain} (Production)`;
+        deployFilter.appendChild(opt);
+      }
+    }
   } catch (err) {
     console.error('Stats poll error:', err);
   }
+}
+
+/* ==========================================================================
+   Domain Settings Prompt
+   ========================================================================== */
+
+async function openDomainSettingsPrompt() {
+  const current = document.getElementById('infoDomain')?.innerText || 'localhost';
+  const newDomain = prompt(`Enter your primary domain name:\n(e.g. mysite.com or yourdomain.net)`, current);
+  if (!newDomain || newDomain.trim() === current) return;
+
+  const domain = newDomain.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+  if (!domain) return;
+
+  try {
+    const res = await fetch('/api/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ primaryDomain: domain })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showToast(`Primary domain updated to: ${domain}`);
+      fetchStats(); // refresh all domain-linked elements
+    } else {
+      showToast('Failed to update domain', 'error');
+    }
+  } catch (err) {
+    showToast('Error updating domain: ' + err.message, 'error');
+  }
+
 }
 
 /* ==========================================================================
@@ -466,7 +543,19 @@ async function loadDatabases() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    (data.databases || []).forEach(db => {
+    const dbs = data.databases || [];
+
+    if (dbs.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5" style="text-align:center; padding: 2.5rem 1rem; color: var(--text-muted);">
+          <i class="fa-solid fa-database" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i>
+          <strong style="display:block; margin-bottom:0.25rem;">No Databases Yet</strong>
+          <span style="font-size:0.82rem;">Create your first MySQL database using the form below.</span>
+        </td></tr>`;
+      return;
+    }
+
+    dbs.forEach(db => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><strong>${escapeHtml(db.name)}</strong></td>
@@ -544,16 +633,55 @@ function executeSqlQuery() {
   const resWrap = document.getElementById('sqlResults');
   if (!sql) return;
 
-  resWrap.innerHTML = `
-    <div class="query-success-msg">
-      <i class="fa-solid fa-check"></i> Query executed successfully on "localhost" (Query took 0.0008 sec)
-    </div>
-    <div style="padding: 1rem; background: var(--bg-input); border-radius: 6px; font-family: var(--font-mono); font-size: 0.85rem;">
-      <strong>Executed Statement:</strong><br>
-      <code style="color: var(--accent-cp);">${escapeHtml(sql)}</code>
-      <div style="margin-top: 0.75rem; color: var(--accent-green);">Query OK, 3 rows affected.</div>
-    </div>
-  `;
+  const upper = sql.toUpperCase().replace(/\s+/g, ' ');
+  let resultHtml = '';
+
+  if (upper.startsWith('SHOW DATABASES')) {
+    resultHtml = `
+      <div class="query-success-msg"><i class="fa-solid fa-check"></i> Query OK — 0.0003 sec</div>
+      <div style="padding:1rem; background:var(--bg-input); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <strong>Databases</strong>
+        <div style="margin-top:0.5rem; color:var(--accent-green);">information_schema<br>performance_schema<br>mysql<br><em style="color:var(--text-muted);">(No user databases yet — create one below)</em></div>
+      </div>`;
+  } else if (upper.startsWith('SHOW TABLES')) {
+    resultHtml = `
+      <div class="query-success-msg"><i class="fa-solid fa-check"></i> Query OK — 0.0004 sec</div>
+      <div style="padding:1rem; background:var(--bg-input); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <strong>Tables</strong><br>
+        <em style="color:var(--text-muted);">No tables found in this database.</em>
+      </div>`;
+  } else if (upper.startsWith('SELECT')) {
+    resultHtml = `
+      <div class="query-success-msg"><i class="fa-solid fa-check"></i> Query OK — 0.0012 sec | 0 rows returned</div>
+      <div style="padding:1rem; background:var(--bg-input); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <code style="color:var(--accent-cp);">${escapeHtml(sql)}</code>
+        <div style="margin-top:0.75rem; color:var(--text-muted);">Empty set (0 rows)</div>
+      </div>`;
+  } else if (upper.startsWith('INSERT') || upper.startsWith('UPDATE') || upper.startsWith('DELETE')) {
+    resultHtml = `
+      <div class="query-success-msg"><i class="fa-solid fa-check"></i> Query OK — 1 row affected — 0.0008 sec</div>
+      <div style="padding:1rem; background:var(--bg-input); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <code style="color:var(--accent-cp);">${escapeHtml(sql)}</code>
+        <div style="margin-top:0.75rem; color:var(--accent-green);">Query OK, 1 row affected.</div>
+      </div>`;
+  } else if (upper.startsWith('CREATE') || upper.startsWith('DROP') || upper.startsWith('ALTER')) {
+    resultHtml = `
+      <div class="query-success-msg"><i class="fa-solid fa-check"></i> Query OK — 0.0021 sec</div>
+      <div style="padding:1rem; background:var(--bg-input); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <code style="color:var(--accent-cp);">${escapeHtml(sql)}</code>
+        <div style="margin-top:0.75rem; color:var(--accent-green);">Query OK, 0 rows affected.</div>
+      </div>`;
+  } else {
+    resultHtml = `
+      <div class="query-success-msg"><i class="fa-solid fa-check"></i> Query executed — 0.0008 sec</div>
+      <div style="padding:1rem; background:var(--bg-input); border-radius:6px; font-family:var(--font-mono); font-size:0.85rem;">
+        <strong>Executed Statement:</strong><br>
+        <code style="color:var(--accent-cp);">${escapeHtml(sql)}</code>
+        <div style="margin-top:0.75rem; color:var(--accent-green);">Query OK.</div>
+      </div>`;
+  }
+
+  resWrap.innerHTML = resultHtml;
 }
 
 /* ==========================================================================
@@ -568,7 +696,19 @@ async function loadDnsRecords() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    (data.dns_records || []).forEach(record => {
+    const records = data.dns_records || [];
+
+    if (records.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="5" style="text-align:center; padding: 2.5rem 1rem; color: var(--text-muted);">
+          <i class="fa-solid fa-globe" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i>
+          <strong style="display:block; margin-bottom:0.25rem;">No DNS Records</strong>
+          <span style="font-size:0.82rem;">Add A, CNAME, MX or TXT records using the form below.</span>
+        </td></tr>`;
+      return;
+    }
+
+    records.forEach(record => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><strong>${escapeHtml(record.name)}</strong></td>
@@ -635,7 +775,19 @@ async function loadEmails() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    (data.email_accounts || []).forEach(acc => {
+    const accounts = data.email_accounts || [];
+
+    if (accounts.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="4" style="text-align:center; padding: 2.5rem 1rem; color: var(--text-muted);">
+          <i class="fa-solid fa-envelope" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i>
+          <strong style="display:block; margin-bottom:0.25rem;">No Email Accounts</strong>
+          <span style="font-size:0.82rem;">Create your first mailbox using the form below.</span>
+        </td></tr>`;
+      return;
+    }
+
+    accounts.forEach(acc => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td><strong>${escapeHtml(acc.email)}</strong></td>
@@ -662,7 +814,10 @@ async function createEmailAccount() {
     showToast('Please specify a username and password', 'error');
     return;
   }
-  const fullEmail = `${user}@example.com`;
+
+  // Use the domain suffix element for the current primary domain
+  const domainSuffix = document.getElementById('emailDomainSuffix')?.innerText?.replace('@','') || 'localhost';
+  const fullEmail = `${user}@${domainSuffix}`;
 
   await fetch('/api/data/email_accounts', {
     method: 'POST',
@@ -707,7 +862,19 @@ async function loadCronJobs() {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-    (data.cron_jobs || []).forEach(job => {
+    const jobs = data.cron_jobs || [];
+
+    if (jobs.length === 0) {
+      tbody.innerHTML = `
+        <tr><td colspan="4" style="text-align:center; padding: 2.5rem 1rem; color: var(--text-muted);">
+          <i class="fa-solid fa-clock" style="font-size:2rem; margin-bottom:0.5rem; display:block; opacity:0.3;"></i>
+          <strong style="display:block; margin-bottom:0.25rem;">No Scheduled Jobs</strong>
+          <span style="font-size:0.82rem;">Add cron expressions and commands using the form below.</span>
+        </td></tr>`;
+      return;
+    }
+
+    jobs.forEach(job => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td class="code-font highlight-text">${escapeHtml(job.schedule)}</td>

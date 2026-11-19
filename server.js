@@ -16,6 +16,7 @@ if (!fs.existsSync(STORAGE_ROOT)) {
 }
 
 // Seed sample files for File Manager if empty
+// Seed standard default file if empty
 function seedSampleFiles() {
   const sampleIndex = path.join(STORAGE_ROOT, 'index.html');
   if (!fs.existsSync(sampleIndex)) {
@@ -23,91 +24,42 @@ function seedSampleFiles() {
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Welcome to My Website</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Default Web Site Page</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      margin: 0; padding: 0; background: #0f172a; color: #f8fafc;
+      display: flex; align-items: center; justify-content: center; min-height: 100vh; text-align: center;
+    }
+    .container {
+      max-width: 600px; padding: 2.5rem; background: #1e293b; border: 1px solid #334155;
+      border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+    .badge {
+      display: inline-block; background: rgba(255, 108, 44, 0.15); color: #ff6c2c;
+      padding: 0.35rem 0.85rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700;
+      margin-bottom: 1rem; text-transform: uppercase;
+    }
+    h1 { font-size: 1.8rem; margin: 0.5rem 0 1rem; color: #ffffff; }
+    p { color: #94a3b8; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .footer-note { font-size: 0.8rem; color: #64748b; border-top: 1px solid #334155; padding-top: 1.25rem; }
+  </style>
 </head>
 <body>
-  <div class="hero">
-    <h1>🚀 Welcome to My Website</h1>
-    <p>This website is successfully hosted and managed via cPanel!</p>
-    <a href="#" class="btn">Explore Features</a>
+  <div class="container">
+    <div class="badge">cPanel Server Online</div>
+    <h1>Default Web Site Page</h1>
+    <p>This is the default index page for your web hosting account. Your web server is operational and ready to host your files.</p>
+    <p>To replace this page, upload your website assets into the <code>public_html</code> directory using the <strong>cPanel File Manager</strong>, FTP, or Git Deployment.</p>
+    <div class="footer-note">Managed via cPanel &bull; Apache &bull; Powered by AWS Cloud Infrastructure</div>
   </div>
 </body>
 </html>`);
 
-    fs.writeFileSync(path.join(STORAGE_ROOT, 'style.css'), `body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  margin: 0;
-  padding: 0;
-  background: #0f172a;
-  color: #f8fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-}
-.hero {
-  text-align: center;
-  padding: 3rem;
-  background: #1e293b;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-}
-.btn {
-  display: inline-block;
-  margin-top: 1.5rem;
-  padding: 0.75rem 1.75rem;
-  background: #ff6c2c;
-  color: #fff;
-  text-decoration: none;
-  border-radius: 8px;
-  font-weight: 600;
-}`);
-
-    fs.writeFileSync(path.join(STORAGE_ROOT, 'wp-config-sample.php'), `<?php
-/**
- * The base configuration for WordPress
- */
-define( 'DB_NAME', 'cpanel_wp_db' );
-define( 'DB_USER', 'cpanel_wp_user' );
-define( 'DB_PASSWORD', 'SecureP@ssw0rd!2026' );
-define( 'DB_HOST', 'localhost' );
-define( 'DB_CHARSET', 'utf8mb4' );
-define( 'DB_COLLATE', '' );
-
-$table_prefix = 'wp_';
-define( 'WP_DEBUG', false );
-
-if ( ! defined( 'ABSPATH' ) ) {
-    define( 'ABSPATH', __DIR__ . '/' );
-}
-require_once ABSPATH . 'wp-settings.php';
-`);
-
-    fs.writeFileSync(path.join(STORAGE_ROOT, 'contact.php'), `<?php
-header('Content-Type: application/json');
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-    $message = htmlspecialchars($_POST['message'] ?? '');
-    
-    echo json_encode([
-        'status' => 'success',
-        'message' => 'Thank you for reaching out! Your message has been queued.'
-    ]);
-    exit;
-}
-
-echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
-`);
-
     fs.writeFileSync(path.join(STORAGE_ROOT, '.htaccess'), `# cPanel Apache Server Directives
 RewriteEngine On
 RewriteBase /
-
-# Force HTTPS
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Prevent directory listings
 Options -Indexes
@@ -132,101 +84,47 @@ Options -Indexes
 }
 seedSampleFiles();
 
-// Initial cPanel mock datasets
-let cpanelData = {
-  databases: [
-    { name: 'cpanel_production', user: 'cpanel_dbadmin', size: '42.8 MB', collation: 'utf8mb4_unicode_ci' },
-    { name: 'cpanel_wordpress', user: 'cpanel_wp_user', size: '18.4 MB', collation: 'utf8mb4_general_ci' },
-    { name: 'cpanel_analytics', user: 'cpanel_stats', size: '6.2 MB', collation: 'utf8_general_ci' }
-  ],
-  dns_records: [
-    { name: 'example.com', type: 'A', record: '192.168.1.100', ttl: 14400 },
-    { name: 'www.example.com', type: 'CNAME', record: 'example.com', ttl: 14400 },
-    { name: 'mail.example.com', type: 'A', record: '192.168.1.100', ttl: 14400 },
-    { name: 'example.com', type: 'MX', record: 'mail.example.com (Priority 10)', ttl: 14400 },
-    { name: 'example.com', type: 'TXT', record: 'v=spf1 +a +mx ~all', ttl: 14400 },
-    { name: '_dmarc.example.com', type: 'TXT', record: 'v=DMARC1; p=quarantine;', ttl: 14400 }
-  ],
-  email_accounts: [
-    { email: 'admin@example.com', usage: '320 MB', quota: '1024 MB', lastAccess: 'Today, 10:14 AM' },
-    { email: 'support@example.com', usage: '85 MB', quota: '500 MB', lastAccess: 'Yesterday' },
-    { email: 'billing@example.com', usage: '12 MB', quota: '500 MB', lastAccess: '3 days ago' },
-    { email: 'newsletter@example.com', usage: '140 MB', quota: 'Unlimited', lastAccess: '1 week ago' }
-  ],
-  cron_jobs: [
-    { id: 1, schedule: '0 0 * * *', command: '/usr/local/bin/php /home/user/public_html/cron.php >/dev/null 2>&1', description: 'Daily Database Backup & Maintenance' },
-    { id: 2, schedule: '*/15 * * * *', command: 'curl -s https://example.com/api/sync-cache', description: 'Cache Invalidation Poller' }
-  ],
-  installed_apps: [
-    { id: 'app-1', name: 'WordPress', version: '6.7.1', domain: 'example.com', path: '/', installedOn: '2026-10-15', status: 'Healthy' },
-    { id: 'app-2', name: 'Node.js App', version: '20.x', domain: 'api.example.com', path: '/api', installedOn: '2026-11-02', status: 'Running' }
-  ],
-  deployments: [
-    {
-      id: 'DEP-1048',
-      domain: 'example.com',
-      environment: 'Production',
-      target: 'AWS App Runner',
-      commit: '873031d',
-      commitMsg: 'Add Render, Docker, and Vercel hosting configurations',
-      author: 'jeshikoJ',
-      branch: 'main',
-      status: 'SUCCESS',
-      timestamp: '2026-11-18 12:01:48',
-      duration: '34s',
-      logs: [
-        '[AWS-DevOps] Triggered by GitHub push to origin/main (commit 873031d)',
-        '[AWS-CodeBuild] Fetching source code from github.com/jeshikoJ/cpannel...',
-        '[AWS-CodeBuild] Running pre-build security & dependency scan: PASSED',
-        '[AWS-CodeBuild] Building Docker image tag cpannel:873031d...',
-        '[AWS-ECR] Pushing image to 123456789012.dkr.ecr.us-east-1.amazonaws.com/cpannel:873031d',
-        '[AWS-AppRunner] Starting service deployment & health probe...',
-        '[AWS-AppRunner] HTTP 200 OK received on port 2083. Deployment successful!',
-        '[AWS-DevOps] Deployment completed in 34 seconds.'
-      ]
-    },
-    {
-      id: 'DEP-1047',
-      domain: 'example.com',
-      environment: 'Production',
-      target: 'AWS App Runner',
-      commit: '86e17f2',
-      commitMsg: 'Initial commit: Modern cPanel Web Hosting Control Panel',
-      author: 'jeshikoJ',
-      branch: 'main',
-      status: 'SUCCESS',
-      timestamp: '2026-11-18 11:58:58',
-      duration: '41s',
-      logs: [
-        '[AWS-DevOps] Initial repository sync from GitHub origin/main',
-        '[AWS-CodeBuild] Container build passed',
-        '[AWS-AppRunner] Provisioned service cluster'
-      ]
-    },
-    {
-      id: 'DEP-1046',
-      domain: 'staging.example.com',
-      environment: 'Staging',
-      target: 'AWS ECS Fargate',
-      commit: '75a92d1',
-      commitMsg: 'Test staging environment configuration',
-      author: 'dev-team',
-      branch: 'develop',
-      status: 'SUCCESS',
-      timestamp: '2026-11-17 18:22:10',
-      duration: '29s',
-      logs: [
-        '[AWS-ECS] Task definition updated to v4',
-        '[AWS-ALB] Target health check 200 OK'
-      ]
+// Detect real network IP address
+function getRealLocalIp() {
+  try {
+    const interfaces = os.networkInterfaces();
+    for (const name of Object.keys(interfaces)) {
+      for (const iface of interfaces[name]) {
+        if (!iface.internal && iface.family === 'IPv4') {
+          return iface.address;
+        }
+      }
     }
-  ]
+  } catch (e) {}
+  return '127.0.0.1';
+}
+
+const SYSTEM_USER = os.userInfo ? (os.userInfo().username || 'admin') : 'admin';
+const DETECTED_IP = getRealLocalIp();
+
+// Clean cPanel datasets (Zero mock/example data)
+let cpanelData = {
+  settings: {
+    primaryDomain: 'localhost',
+    sharedIp: DETECTED_IP,
+    currentUser: SYSTEM_USER
+  },
+  databases: [],
+  dns_records: [],
+  email_accounts: [],
+  cron_jobs: [],
+  installed_apps: [],
+  deployments: []
 };
 
 // Load saved data if exists
 if (fs.existsSync(DATA_FILE)) {
   try {
-    cpanelData = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    const loaded = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+    cpanelData = { ...cpanelData, ...loaded };
+    if (!cpanelData.settings) {
+      cpanelData.settings = { primaryDomain: 'localhost', sharedIp: DETECTED_IP, currentUser: SYSTEM_USER };
+    }
   } catch (e) {
     console.error('Error loading cpanel_data.json:', e);
   }
@@ -371,6 +269,8 @@ const server = http.createServer(async (req, res) => {
     }
 
     const storageMB = (totalStorageBytes / (1024 * 1024)).toFixed(2);
+    const dbCount = (cpanelData.databases || []).length;
+    const dbDiskMB = (dbCount * 4.2).toFixed(2);
 
     return sendJson(res, {
       server: {
@@ -382,8 +282,10 @@ const server = http.createServer(async (req, res) => {
         apacheVersion: 'Apache/2.4.62 (Unix)',
         phpVersion: 'PHP 8.3.14',
         mysqlVersion: 'MySQL 8.0.39-community',
-        serverIp: '192.168.1.100',
-        serverName: 'cpanel.localdomain',
+        serverIp: cpanelData.settings?.sharedIp || DETECTED_IP,
+        primaryDomain: cpanelData.settings?.primaryDomain || 'localhost',
+        currentUser: cpanelData.settings?.currentUser || SYSTEM_USER,
+        serverName: os.hostname(),
         sslStatus: 'Active (AutoSSL Valid)'
       },
       resources: {
@@ -403,27 +305,32 @@ const server = http.createServer(async (req, res) => {
         disk: {
           usedMB: storageMB,
           quotaMB: '50000.00',
-          usagePercent: parseFloat(((parseFloat(storageMB) / 50000) * 100).toFixed(2)) || 2.4
+          usagePercent: parseFloat(((parseFloat(storageMB) / 50000) * 100).toFixed(2)) || 0.1
         },
         bandwidth: {
-          usedGB: '38.45',
+          usedGB: '0.00',
           quotaGB: '500.00',
-          usagePercent: 7.7
+          usagePercent: 0.0
         },
         inodes: {
-          used: fileCount + 1420,
+          used: fileCount,
           limit: 250000,
-          usagePercent: parseFloat((((fileCount + 1420) / 250000) * 100).toFixed(1))
+          usagePercent: parseFloat(((fileCount / 250000) * 100).toFixed(2)) || 0.01
         },
         mysqlDisk: {
-          usedMB: '67.4 MB',
+          usedMB: `${dbDiskMB} MB`,
           quotaMB: '5000 MB',
-          usagePercent: 1.3
+          usagePercent: parseFloat(((parseFloat(dbDiskMB) / 5000) * 100).toFixed(2)) || 0.0
         },
         entryProcesses: {
-          current: 3,
+          current: 1,
           limit: 25
         }
+      },
+      settings: {
+        primaryDomain: cpanelData.settings?.primaryDomain || 'localhost',
+        sharedIp: cpanelData.settings?.sharedIp || DETECTED_IP || '127.0.0.1',
+        currentUser: cpanelData.settings?.currentUser || SYSTEM_USER || 'admin'
       }
     });
   }
@@ -591,11 +498,13 @@ Available commands:
       }
 
       if (lowerCmd === 'whoami') {
-        return sendJson(res, { output: 'cpanel_admin (UID: 1001, GID: 1001, Home: /home/cpanel_admin)' });
+        const u = cpanelData.settings?.currentUser || SYSTEM_USER;
+        return sendJson(res, { output: `${u} (UID: 1000, GID: 1000, Home: /home/${u})` });
       }
 
       if (lowerCmd === 'pwd') {
-        return sendJson(res, { output: '/home/cpanel_admin/public_html' });
+        const u = cpanelData.settings?.currentUser || SYSTEM_USER;
+        return sendJson(res, { output: `/home/${u}/public_html` });
       }
 
       if (lowerCmd === 'uptime') {
@@ -703,6 +612,25 @@ Swap:           4096         120        3976`
           persistData();
           return sendJson(res, { success: true, [collection]: cpanelData[collection] });
         }
+      } catch (e) {
+        return sendJson(res, { error: e.message }, 500);
+      }
+    }
+  }
+
+  // Settings API
+  if (pathname === '/api/settings') {
+    if (req.method === 'GET') {
+      return sendJson(res, { settings: cpanelData.settings });
+    }
+    if (req.method === 'POST') {
+      try {
+        const body = await parseJsonBody(req);
+        if (body.primaryDomain) cpanelData.settings.primaryDomain = body.primaryDomain.trim();
+        if (body.currentUser) cpanelData.settings.currentUser = body.currentUser.trim();
+        if (body.sharedIp) cpanelData.settings.sharedIp = body.sharedIp.trim();
+        persistData();
+        return sendJson(res, { success: true, settings: cpanelData.settings });
       } catch (e) {
         return sendJson(res, { error: e.message }, 500);
       }

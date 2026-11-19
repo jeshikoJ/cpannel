@@ -189,7 +189,7 @@
               <span class="tool-desc">Manage domain names and document roots</span>
             </div>
           </div>
-          <div class="tool-item" onclick="showToast('Subdomains manager: api.example.com, staging.example.com active')">
+          <div class="tool-item" onclick="showToast('Subdomains manager: Configure subdomains via Zone Editor')">
             <div class="tool-icon-box"><i class="fa-solid fa-diagram-project"></i></div>
             <div class="tool-meta">
               <span class="tool-title">Subdomains</span>
@@ -228,10 +228,10 @@
             <div class="tool-icon-box"><i class="fa-solid fa-inbox"></i></div>
             <div class="tool-meta">
               <span class="tool-title">Webmail</span>
-              <span class="tool-desc">Check mail via Roundcube simulation</span>
+              <span class="tool-desc">Check mail via Roundcube</span>
             </div>
           </div>
-          <div class="tool-item" onclick="showToast('Forwarder: support@example.com -> admin@example.com configured')">
+          <div class="tool-item" onclick="showToast('Forwarders: No active forwarders configured')">
             <div class="tool-icon-box"><i class="fa-solid fa-share"></i></div>
             <div class="tool-meta">
               <span class="tool-title">Forwarders</span>
@@ -431,19 +431,19 @@
         <div class="sidebar-info-list">
           <div class="info-row">
             <span class="info-label">Current User:</span>
-            <span class="info-value highlight" id="infoUsername">cpanel_admin</span>
+            <span class="info-value highlight" id="infoUsername">admin</span>
           </div>
           <div class="info-row">
             <span class="info-label">Primary Domain:</span>
-            <span class="info-value" id="infoDomain">example.com</span>
+            <span class="info-value highlight" id="infoDomain" style="cursor: pointer;" title="Click to change domain" onclick="openDomainSettingsPrompt()">localhost <i class="fa-solid fa-pen" style="font-size: 0.7rem; margin-left: 4px;"></i></span>
           </div>
           <div class="info-row">
             <span class="info-label">Shared IP Address:</span>
-            <span class="info-value" id="infoIp">192.168.1.100</span>
+            <span class="info-value" id="infoIp">192.168.88.26</span>
           </div>
           <div class="info-row">
             <span class="info-label">Home Directory:</span>
-            <span class="info-value code-font" id="infoHomeDir">/home/cpanel_admin</span>
+            <span class="info-value code-font" id="infoHomeDir">/home/admin/public_html</span>
           </div>
           <div class="info-row">
             <span class="info-label">cPanel Version:</span>
@@ -504,10 +504,10 @@
           <div class="stat-gauge-item">
             <div class="stat-meta">
               <span class="stat-name"><i class="fa-solid fa-hard-drive"></i> Disk Usage</span>
-              <span class="stat-numbers" id="diskNumbers">1.2 MB / 50 GB</span>
+              <span class="stat-numbers" id="diskNumbers">0.00 MB / 50 GB</span>
             </div>
             <div class="stat-progress-bar">
-              <div class="stat-fill fill-green" id="diskFill" style="width: 2.4%;"></div>
+              <div class="stat-fill fill-green" id="diskFill" style="width: 0.1%;"></div>
             </div>
             <span class="stat-subtext">50,000 MB Total Quota</span>
           </div>
@@ -516,10 +516,10 @@
           <div class="stat-gauge-item">
             <div class="stat-meta">
               <span class="stat-name"><i class="fa-solid fa-gauge-high"></i> Monthly Bandwidth</span>
-              <span class="stat-numbers" id="bandwidthNumbers">38.45 GB / 500 GB</span>
+              <span class="stat-numbers" id="bandwidthNumbers">0.00 GB / 500 GB</span>
             </div>
             <div class="stat-progress-bar">
-              <div class="stat-fill fill-blue" id="bandwidthFill" style="width: 7.7%;"></div>
+              <div class="stat-fill fill-blue" id="bandwidthFill" style="width: 0%;"></div>
             </div>
             <span class="stat-subtext">Renews on the 1st of next month</span>
           </div>
@@ -528,10 +528,10 @@
           <div class="stat-gauge-item">
             <div class="stat-meta">
               <span class="stat-name"><i class="fa-solid fa-file-lines"></i> File Count (Inodes)</span>
-              <span class="stat-numbers" id="inodeNumbers">1,425 / 250,000</span>
+              <span class="stat-numbers" id="inodeNumbers">2 / 250,000</span>
             </div>
             <div class="stat-progress-bar">
-              <div class="stat-fill fill-green" id="inodeFill" style="width: 1%;"></div>
+              <div class="stat-fill fill-green" id="inodeFill" style="width: 0.01%;"></div>
             </div>
           </div>
 
@@ -539,10 +539,10 @@
           <div class="stat-gauge-item">
             <div class="stat-meta">
               <span class="stat-name"><i class="fa-solid fa-database"></i> MySQL&reg; Disk Usage</span>
-              <span class="stat-numbers">67.4 MB / 5,000 MB</span>
+              <span class="stat-numbers" id="mysqlDiskNumbers">0.00 MB / 5,000 MB</span>
             </div>
             <div class="stat-progress-bar">
-              <div class="stat-fill fill-purple" style="width: 1.3%;"></div>
+              <div class="stat-fill fill-purple" id="mysqlDiskFill" style="width: 0%;"></div>
             </div>
           </div>
 
@@ -550,10 +550,10 @@
           <div class="stat-gauge-item">
             <div class="stat-meta">
               <span class="stat-name"><i class="fa-solid fa-arrows-split-up-and-left"></i> Entry Processes</span>
-              <span class="stat-numbers">3 / 25</span>
+              <span class="stat-numbers">1 / 25</span>
             </div>
             <div class="stat-progress-bar">
-              <div class="stat-fill fill-green" style="width: 12%;"></div>
+              <div class="stat-fill fill-green" style="width: 4%;"></div>
             </div>
           </div>
 
@@ -703,49 +703,17 @@
       <div class="pma-body">
         <div class="sql-console-wrap">
           <label><strong>Run SQL query/queries on server "localhost":</strong></label>
-          <textarea id="sqlQueryInput" class="sql-textarea">SELECT * FROM `wp_posts` WHERE `post_status` = 'publish' LIMIT 10;</textarea>
+          <textarea id="sqlQueryInput" class="sql-textarea">SHOW DATABASES;</textarea>
           <div class="sql-actions">
             <button class="btn-primary" onclick="executeSqlQuery()"><i class="fa-solid fa-play"></i> Go (Execute)</button>
+            <button class="btn-outline" onclick="document.getElementById('sqlQueryInput').value='SHOW DATABASES;'"><i class="fa-solid fa-database"></i> SHOW DATABASES</button>
             <button class="btn-outline" onclick="document.getElementById('sqlQueryInput').value='SHOW TABLES;'"><i class="fa-solid fa-list"></i> SHOW TABLES</button>
             <button class="btn-outline" onclick="document.getElementById('sqlQueryInput').value='SHOW PROCESSLIST;'"><i class="fa-solid fa-heart-pulse"></i> SHOW PROCESSLIST</button>
           </div>
         </div>
         <div class="sql-result-wrap" id="sqlResults">
-          <div class="query-success-msg"><i class="fa-solid fa-check"></i> Showing rows 0 - 2 (3 total, Query took 0.0014 seconds.)</div>
-          <table class="styled-table pma-table">
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>post_title</th>
-                <th>post_status</th>
-                <th>post_date</th>
-                <th>comment_count</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>1</td>
-                <td><strong>Welcome to your new cPanel Site</strong></td>
-                <td><span class="badge-success">publish</span></td>
-                <td>2026-11-10 14:22:00</td>
-                <td>0</td>
-              </tr>
-              <tr>
-                <td>2</td>
-                <td><strong>Sample Page</strong></td>
-                <td><span class="badge-success">publish</span></td>
-                <td>2026-11-10 14:22:00</td>
-                <td>1</td>
-              </tr>
-              <tr>
-                <td>3</td>
-                <td><strong>AutoSSL Integration Guide</strong></td>
-                <td><span class="badge-success">publish</span></td>
-                <td>2026-11-12 09:15:30</td>
-                <td>4</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="query-success-msg"><i class="fa-solid fa-check"></i> MySQL Server connection active on localhost (MySQL 8.0.39). Execute SQL statements using the console above.</div>
+          <div id="pmaDynamicTable"></div>
         </div>
       </div>
       <div class="modal-footer">
@@ -771,7 +739,7 @@
           <div class="dns-form-grid">
             <div>
               <label>Name</label>
-              <input type="text" id="dnsName" placeholder="sub.example.com" class="styled-input">
+              <input type="text" id="dnsName" placeholder="e.g. mail or @" class="styled-input">
             </div>
             <div>
               <label>TTL</label>
@@ -789,7 +757,7 @@
             </div>
             <div>
               <label>Record / Value</label>
-              <input type="text" id="dnsRecord" placeholder="192.168.1.100 or host" class="styled-input">
+              <input type="text" id="dnsRecord" placeholder="e.g. 192.168.88.26 or host" class="styled-input">
             </div>
           </div>
           <div style="margin-top: 1rem; text-align: right;">
@@ -799,7 +767,7 @@
 
         <!-- DNS Records Table -->
         <div class="card-section">
-          <h4><i class="fa-solid fa-list"></i> Zone Records for example.com</h4>
+          <h4><i class="fa-solid fa-list"></i> Configured Zone Records</h4>
           <table class="styled-table">
             <thead>
               <tr>
@@ -841,7 +809,7 @@
               <label>Username</label>
               <div class="input-suffix-group">
                 <input type="text" id="emailUser" placeholder="username" class="styled-input">
-                <span class="input-suffix">@example.com</span>
+                <span class="input-suffix" id="emailDomainSuffix">@localhost</span>
               </div>
             </div>
             <div>
@@ -894,33 +862,23 @@
       <div class="modal-header webmail-header">
         <div class="modal-title-wrap">
           <i class="fa-solid fa-inbox modal-icon"></i>
-          <h3>Roundcube Webmail &mdash; admin@example.com</h3>
+          <h3 id="webmailModalTitle">Roundcube Webmail</h3>
         </div>
         <button class="modal-close-btn" onclick="closeModal('webmailModal')">&times;</button>
       </div>
       <div class="webmail-layout">
         <div class="webmail-folders">
-          <button class="wm-folder active"><i class="fa-solid fa-inbox"></i> Inbox (2)</button>
+          <button class="wm-folder active"><i class="fa-solid fa-inbox"></i> Inbox (0)</button>
           <button class="wm-folder"><i class="fa-solid fa-paper-plane"></i> Sent</button>
           <button class="wm-folder"><i class="fa-solid fa-file-lines"></i> Drafts</button>
           <button class="wm-folder"><i class="fa-solid fa-trash"></i> Trash</button>
           <button class="wm-folder"><i class="fa-solid fa-triangle-exclamation"></i> Junk</button>
         </div>
-        <div class="webmail-inbox">
-          <div class="mail-item unread">
-            <div class="mail-sender"><strong>cPanel AutoSSL Notification</strong></div>
-            <div class="mail-subject">SSL Certificate auto-renewed successfully for example.com</div>
-            <div class="mail-date">10:14 AM</div>
-          </div>
-          <div class="mail-item unread">
-            <div class="mail-sender"><strong>Security Advisor</strong></div>
-            <div class="mail-subject">Server report: 0 vulnerabilities found, CSF Firewall active</div>
-            <div class="mail-date">Yesterday</div>
-          </div>
-          <div class="mail-item">
-            <div class="mail-sender"><strong>WordPress Auto-Updater</strong></div>
-            <div class="mail-subject">WordPress 6.7.1 updated automatically</div>
-            <div class="mail-date">Nov 14</div>
+        <div class="webmail-inbox" style="display: flex; align-items: center; justify-content: center; min-height: 280px;">
+          <div style="text-align: center; color: var(--text-muted); padding: 2rem;">
+            <i class="fa-solid fa-inbox" style="font-size: 3rem; margin-bottom: 0.75rem; opacity: 0.35;"></i>
+            <h4 style="color: var(--text-primary); margin-bottom: 0.35rem;">Inbox is Empty</h4>
+            <p style="font-size: 0.85rem;">No new incoming messages for this account.</p>
           </div>
         </div>
       </div>
@@ -1018,8 +976,7 @@
             <div>
               <label>Choose Protocol &amp; Domain</label>
               <select id="installDomain" class="styled-input">
-                <option value="https://example.com">https://example.com</option>
-                <option value="https://blog.example.com">https://blog.example.com</option>
+                <option value="http://localhost">http://localhost</option>
               </select>
             </div>
             <div>
@@ -1142,24 +1099,12 @@
               <th>Status</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="sslTableBody">
             <tr>
-              <td><strong>example.com</strong></td>
-              <td>Let's Encrypt Authority X3 (RSA 2048)</td>
-              <td>In 78 days (Feb 2027)</td>
-              <td><span class="badge-success"><i class="fa-solid fa-check"></i> AutoSSL Domain Validated</span></td>
-            </tr>
-            <tr>
-              <td><strong>www.example.com</strong></td>
-              <td>Let's Encrypt Authority X3 (RSA 2048)</td>
-              <td>In 78 days (Feb 2027)</td>
-              <td><span class="badge-success"><i class="fa-solid fa-check"></i> AutoSSL Domain Validated</span></td>
-            </tr>
-            <tr>
-              <td><strong>mail.example.com</strong></td>
-              <td>Let's Encrypt Authority X3 (RSA 2048)</td>
-              <td>In 78 days (Feb 2027)</td>
-              <td><span class="badge-success"><i class="fa-solid fa-check"></i> AutoSSL Domain Validated</span></td>
+              <td><strong id="sslPrimaryDomain">localhost</strong></td>
+              <td>Let's Encrypt / AutoSSL Engine</td>
+              <td>Active (Automated Validation)</td>
+              <td><span class="badge-success"><i class="fa-solid fa-check"></i> System Protected</span></td>
             </tr>
           </tbody>
         </table>
@@ -1244,8 +1189,6 @@
             <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 500;">Filter Domain:</label>
             <select id="deployDomainFilter" class="styled-input" style="width: auto; padding: 0.35rem 0.65rem;" onchange="filterDeployments()">
               <option value="all">All Domains &amp; Subdomains</option>
-              <option value="example.com">example.com (Production)</option>
-              <option value="staging.example.com">staging.example.com (Staging)</option>
             </select>
           </div>
           <div>
@@ -1316,9 +1259,9 @@
         <div>
           <label style="display: block; font-size: 0.8rem; margin-bottom: 0.35rem; color: var(--text-secondary);">Select Domain / Hosted Site</label>
           <select id="newDeployDomain" class="styled-input">
-            <option value="example.com">example.com (Root Domain)</option>
-            <option value="staging.example.com">staging.example.com (Staging)</option>
-            <option value="api.example.com">api.example.com (API Service)</option>
+            <option value="localhost">localhost (Root Domain)</option>
+            <option value="staging.localhost">staging.localhost (Staging)</option>
+            <option value="api.localhost">api.localhost (API Service)</option>
           </select>
         </div>
         <div style="margin-top: 0.8rem;">
